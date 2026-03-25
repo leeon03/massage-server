@@ -1,15 +1,7 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-// Email-Konfiguration
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: true, // true für 465, false für andere Ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// SendGrid initialisieren
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // HTML-Vorlage für Rechnung
 function generateInvoiceHTML(invoiceData) {
@@ -189,7 +181,7 @@ async function sendInvoice(invoiceData) {
     const htmlContent = generateInvoiceHTML(invoiceData);
 
     // Email an Kunde
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.EMAIL_FROM,
       to: invoiceData.customerEmail,
       subject: `✓ Zahlung erhalten - Rechnung #${invoiceData.paymentId.substring(0, 8).toUpperCase()}`,
@@ -199,7 +191,7 @@ async function sendInvoice(invoiceData) {
     console.log('✓ Rechnung an Kunde versandt:', invoiceData.customerEmail);
 
     // Email an Shop-Owner
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.EMAIL_FROM,
       to: process.env.SHOP_EMAIL,
       subject: `💰 Neue Zahlung: ${invoiceData.productName} (€ ${(invoiceData.amount / 100).toFixed(2)})`,
@@ -209,7 +201,7 @@ async function sendInvoice(invoiceData) {
     console.log('✓ Rechnung an Shop versandt:', process.env.SHOP_EMAIL);
     return true;
   } catch (error) {
-    console.error('✗ Fehler beim Versenden der Rechnung:', error);
+    console.error('✗ Fehler beim Versenden der Rechnung:', error.message);
     return false;
   }
 }
