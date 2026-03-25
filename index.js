@@ -83,16 +83,22 @@ app.post('/webhook', async (req, res) => {
       const chargeAmount = paymentIntent.amount;
 
       if (metadata.email && metadata.name && metadata.serviceType) {
-        // Rechnung versenden an Kunde und Shop
-        await sendInvoice({
-          customerName: metadata.name,
-          customerEmail: metadata.email,
-          productName: metadata.serviceType,
-          amount: chargeAmount,
-          paymentId: paymentIntent.id,
-          date: new Date(),
-          shopName: process.env.SHOP_NAME || 'Lenka Novotná',
-        });
+        try {
+          // Rechnung versenden an Kunde und Shop
+          await sendInvoice({
+            customerName: metadata.name,
+            customerEmail: metadata.email,
+            productName: metadata.serviceType,
+            amount: chargeAmount,
+            paymentId: paymentIntent.id,
+            date: new Date(),
+            shopName: process.env.SHOP_NAME || 'Lenka Novotná',
+          });
+        } catch (emailError) {
+          console.error('✗ Fehler beim Email-Versand:', emailError.message);
+        }
+      } else {
+        console.warn('⚠ Metadata unvollständig für sendInvoice:', { email: metadata.email, name: metadata.name, serviceType: metadata.serviceType });
       }
       break;
 
