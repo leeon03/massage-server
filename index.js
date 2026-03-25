@@ -8,7 +8,12 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:8080', 'file://', '*'], // Alle Origins erlauben für lokale Tests
+  origin: [
+    'http://localhost:3001',
+    'http://localhost:8080',
+    'file://',
+    'https://willowy-nougat-e119e3.netlify.app'
+  ],
   credentials: true
 }));
 
